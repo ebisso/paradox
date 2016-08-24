@@ -46,9 +46,9 @@ def log_msg_bytes(bytes):
     raw = unpack("BBBB", bytes)
     text = hex(raw[0]) + " " + hex(raw[1]) + " " + hex(raw[2]) + " " + hex(raw[3])
     mqttc.publish("p1738/debug", payload=text, qos=1)
-    logging.info(text)
+    logging.debug(text)
 
-logging.basicConfig(filename='p1738.log',level=logging.DEBUG)
+logging.basicConfig(filename='p1738.log',level=logging.WARNING)
 logging.info("Connecting to MQTT Broker: " + hostname)
 
 mqttc = mqtt.Client()
@@ -61,6 +61,7 @@ mqttc.publish("p1738/service", payload="online", qos=1, retain=True)
 port = serial.Serial("/dev/ttyAMA0", baudrate=9600, inter_byte_timeout=1)
 
 print("Paradox Spectra 1738 to MQTT started")
+logging.info("Connected")
 
 while True:
     rcv = port.read(4)
@@ -73,6 +74,6 @@ while True:
             mqttc.publish(topic, payload=state, qos=1)        
             logging.info(state + " is being published to " + topic)
         else:
-            logging.info("msg not recognized.")
+            logging.warning("msg not recognized.")
     else:
-        logging.info(repr(len(rcv)) + " bytes discarded")
+        logging.warning(repr(len(rcv)) + " bytes discarded")
