@@ -44,7 +44,9 @@ def get_state_for_event(event):
 
 def log_msg_bytes(bytes):
     raw = unpack("BBBB", bytes)
-    logging.info("> " + hex(raw[0]) + " " + hex(raw[1]) + " " + hex(raw[2]) + " " + hex(raw[3]))
+    text = hex(raw[0]) + " " + hex(raw[1]) + " " + hex(raw[2]) + " " + hex(raw[3])
+    mqttc.publish("p1738/debug", payload=text, qos=1)
+    logging.info(text)
 
 logging.basicConfig(filename='p1738.log',level=logging.DEBUG)
 logging.info("Connecting to MQTT Broker: " + hostname)
