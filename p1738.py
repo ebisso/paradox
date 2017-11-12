@@ -58,22 +58,26 @@ mqttc.loop_start()
 
 mqttc.publish("p1738/service", payload="online", qos=1, retain=True)
 
-port = serial.Serial("/dev/ttyAMA0", baudrate=9600, inter_byte_timeout=1)
+port = serial.Serial("/dev/ttyAMA0", baudrate=9600, timeout=5)
 
 print("Paradox Spectra 1738 to MQTT started")
 logging.info("Connected")
 
 while True:
-    rcv = port.read(4)
-    if len(rcv) == 4:
-        log_msg_bytes(rcv)
-        (type, event, zone) = parse_msg(rcv)
-        if (type == 0 and (event == 0 or event == 1) and (zone >= 0 and zone <= 8)):
-            topic = get_topic_for_zone(zone)
-            state = get_state_for_event(event)
-            mqttc.publish(topic, payload=state, qos=1)        
-            logging.info(state + " is being published to " + topic)
+    # Read first byte
+    rcv = port.read(1)
+    if len(rcv) == 1:
+        # Read the following 3 bytes
+        rcv += port.read(3)
+        if len(rcv) == 4:
+            log_msg_bytes(rcv)
+            (type, event, zone) = parse_msg(rcv)
+            if (type == 0 and (event == 0 or event == 1) and (zone >= 0 and zone <= 8)):
+                topic = get_topic_for_zone(zone)
+                state = get_state_for_event(event)
+                mqttc.publish(topic, payload=state, qos=1)
+                logging.info(state + " is being published to " + topic)
+            else:
+                logging.warning("msg not recognized.")
         else:
-            logging.warning("msg not recognized.")
-    else:
-        logging.warning(repr(len(rcv)) + " bytes discarded")
+            logging.warning(repr(len(rcv)) + " bytes discarded")
