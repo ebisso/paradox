@@ -1,0 +1,19 @@
+### 1738.yaml
+
+mqtt_broker: 127.0.0.1
+
+status:
+  mqtt_topic: paradox/status
+  message_connected: ONLINE
+  message_disconnected: OFFLINE
+
+serial:
+  device: /dev/ttyAMA0
+
+message_mapping:
+  - bytes: 00 00
+    topic: paradox/alarm
+    message: disarmed
+  - bytes: 00 01
+    topic: paradox/alarm
+    message: armed
