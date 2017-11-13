@@ -1,19 +1,83 @@
 ### 1738.yaml
 
+# mqtt connection
 mqtt_broker: 127.0.0.1
 
-status:
-  mqtt_topic: paradox/status
-  message_connected: ONLINE
-  message_disconnected: OFFLINE
-
+# serial connection
 serial:
   device: /dev/ttyAMA0
 
+# status
+status:
+  mqtt_topic: paradox/status
+  message_connect: ONLINE
+  message_disconnect: OFFLINE
+
+
 message_mapping:
-  - bytes: 00 00
-    topic: paradox/alarm
+  # alarm panel
+  - bytes: [0x3c, 0x11]
+    topic: paradox/alarm_panel
     message: disarmed
-  - bytes: 00 01
-    topic: paradox/alarm
-    message: armed
+  - bytes: [0x00, 0x00]
+    topic: paradox/alarm_panel
+    message: armed_home
+  - bytes: [0x34, 0x11]
+    topic: paradox/alarm_panel
+    message: armed_away
+  - bytes: [0x00, 0x00]
+    topic: paradox/alarm_panel
+    message: pending
+  - bytes: [0x00, 0x00]
+    topic: paradox/alarm_panel
+    message: triggered
+    
+    # contacts
+  - bytes: [0x04, 0x11]
+    topic: paradox/contacts/1
+    message: ON
+  - bytes: [0x00, 0x11]
+    topic: paradox/contacts/1
+    message: OFF
+  - bytes: [0x04, 0x21]
+    topic: paradox/contacts/2
+    message: ON
+  - bytes: [0x00, 0x21]
+    topic: paradox/contacts/2
+    message: OFF
+  - bytes: [0x04, 0x31]
+    topic: paradox/contacts/3
+    message: ON
+  - bytes: [0x00, 0x31]
+    topic: paradox/contacts/3
+    message: OFF
+  - bytes: [0x04, 0x41]
+    topic: paradox/contacts/4
+    message: ON
+  - bytes: [0x00, 0x41]
+    topic: paradox/contacts/4
+    message: OFF
+  - bytes: [0x04, 0x51]
+    topic: paradox/contacts/5
+    message: ON
+  - bytes: [0x00, 0x51]
+    topic: paradox/contacts/5
+    message: OFF
+  - bytes: [0x04, 0x61]
+    topic: paradox/contacts/6
+    message: ON
+  - bytes: [0x00, 0x61]
+    topic: paradox/contacts/6
+    message: OFF
+  - bytes: [0x04, 0x71]
+    topic: paradox/contacts/7
+    message: ON
+  - bytes: [0x00, 0x71]
+    topic: paradox/contacts/7
+    message: OFF
+  - bytes: [0x04, 0x81]
+    topic: paradox/contacts/8
+    message: ON
+  - bytes: [0x00, 0x81]
+    topic: paradox/contacts/8
+    message: OFF
