@@ -1,7 +1,7 @@
 """
 P1738.py
-This script listens for debug serial port packets from a Paradox 1738
-alarm panel and sends the decoded messages to a MQTT broker.
+This script listens for debug serial port packets from a Paradox Spectra 1738
+alarm panel and sends decoded messages to a MQTT broker.
 """
 import logging
 import sys
@@ -25,50 +25,33 @@ A MQTT bridge for Paradox Spectra alarm panel
 # port while performing different actions such as opening and closing each of
 # the contacts, arming and disarming the panel, etc.
 # This is incomplete and some parts may be wrong.
-# Each packet has a length of 32-bit, where the first 2 bytes is the data of
-# the event and the last 2 bytes is a timestamp.
+# Each packet has a length of 32-bit, where the first group of 2 bytes is an
+# event code and the last group of 2 bytes is a timestamp.
 #  0                   1                   2                   3
 #  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-# |     |T| E | |  Zone   |       |  Hours  |   Minutes   |       |
+# |     |T| E | |  Zone   |       |  Hours  | |  Minutes  |       |
 # +-------------------------------+-------------------------------+
 
 def parse_msg(packet):
-    """ Decode a serial packet into a meaningful message """
-    raw = struct.unpack("!HH", packet)
-    type_ = (raw[0] >> 12) & 1
-    event = (raw[0] >> 10) & 0b11
-    zone = (raw[0] >> 4) & 0b11111
-    hours = (raw[1] >> 11) & 0b11111
-    minutes = (raw[1] >> 4) & 0b111111
-    return type_, event, zone, hours, minutes
+    """ Decodes a serial packet into event code and timestamp parts """
+    raw = struct.unpack("!BBH", packet)
+    code = [raw[0], raw[1]]
+    hours = (raw[2] >> 11) & 0b11111
+    minutes = (raw[2] >> 4) & 0b111111
+    return code, hours, minutes
 
-def get_topic_for_zone(zone):
-    """ Maps a zone index to a MQTT topic """
-    topics = {
-        1: "p1738/zones/1",
-        2: "p1738/zones/2",
-        3: "p1738/zones/3",
-        4: "p1738/zones/4",
-        5: "p1738/zones/5",
-        6: "p1738/zones/6",
-        7: "p1738/zones/7",
-        8: "p1738/zones/8",
-    }
-    return topics.get(zone, "p1738/unknown")
-
-def get_state_for_event(event):
-    """ Maps an event value to a corresponding message """
-    states = {
-        0: "CLOSED",
-        1: "OPEN",
-    }
-    return states.get(event, "unknown")
+def find_mapping(code):
+    """ Looks-up an event code for a matching message mapping """
+    for mapping in MESSAGE_MAPPING:
+        if mapping['bytes'] == code:
+            return mapping
 
 def log_msg_bytes(packet):
     """ Logs the packet content """
     raw = struct.unpack("BBBB", packet)
-    text = hex(raw[0]) + " " + hex(raw[1]) + " " + hex(raw[2]) + " " + hex(raw[3])
+    text = (hex(raw[0]) + " " + hex(raw[1]) + " " + hex(raw[2]) + " "
+            + hex(raw[3]))
     MQTT_CLIENT.publish("p1738/debug", payload=text, qos=1)
     logging.info("In: " + text)
 
@@ -85,14 +68,16 @@ def run_loop():
             rcv += SERIAL.read(3)
             if len(rcv) == 4:
                 log_msg_bytes(rcv)
-                (type_, event, zone, _hours, _minutes) = parse_msg(rcv)
-                if type_ == 0 and (event == 0 or event == 1) and (zone >= 0 and zone <= 8):
-                    topic = get_topic_for_zone(zone)
-                    state = get_state_for_event(event)
-                    MQTT_CLIENT.publish(topic, payload=state, qos=1)
-                    logging.info("Out: " + topic + ", " + state)
+                (code, _hours, _minutes) = parse_msg(rcv)
+                mapping = find_mapping(code)
+                if mapping:
+                    topic = mapping['topic']
+                    message = mapping['message']
+                    logging.info("Out: " + repr(topic) + ", " + repr(message))
+                    MQTT_CLIENT.publish(topic, payload=message, qos=1)
             else:
-                logging.warning("The following bytes have been discarded: " + repr(rcv))
+                logging.warning("The following bytes have been discarded: " +
+                                repr(rcv))
 
 logging.getLogger().setLevel(logging.INFO)
 LOGGING_FILE_HANDLER = logging.FileHandler('p1738.log', 'w')
@@ -108,15 +93,21 @@ CONFIG = yaml.safe_load(open("1738.yaml"))
 
 MQTT_BROKER = CONFIG['mqtt_broker']
 SERIAL_DEVICE = CONFIG['serial_device']
+STATUS_TOPIC = CONFIG['status']['topic']
+STATUS_MESSAGE_CONNECT = CONFIG['status']['message_connect']
+STATUS_MESSAGE_DISCONNECT = CONFIG['status']['message_disconnect']
+MESSAGE_MAPPING = CONFIG['message_mapping']
 
 logging.info("Connecting to MQTT Broker: " + MQTT_BROKER)
 
 MQTT_CLIENT = mqtt.Client()
-MQTT_CLIENT.will_set("p1738/service", payload="offline", qos=1, retain=True)
+MQTT_CLIENT.will_set(STATUS_TOPIC, payload=STATUS_MESSAGE_DISCONNECT, qos=1,
+                     retain=True)
 MQTT_CLIENT.connect(MQTT_BROKER)
 MQTT_CLIENT.loop_start()
 
-MQTT_CLIENT.publish("p1738/service", payload="online", qos=1, retain=True)
+MQTT_CLIENT.publish(STATUS_TOPIC, payload=STATUS_MESSAGE_CONNECT, qos=1,
+                    retain=True)
 
 logging.info("Connected")
 
