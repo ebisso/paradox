@@ -4,8 +4,7 @@
 mqtt_broker: 127.0.0.1
 
 # serial connection
-serial:
-  device: /dev/ttyAMA0
+serial_device: /dev/ttyAMA0
 
 # status
 status:

@@ -10,6 +10,16 @@ import serial
 import paho.mqtt.client as mqtt
 import yaml
 
+print("""
+         ██╗███████╗██████╗  █████╗ 
+        ███║╚════██║╚════██╗██╔══██╗
+        ╚██║    ██╔╝ █████╔╝╚█████╔╝
+         ██║   ██╔╝  ╚═══██╗██╔══██╗
+         ██║   ██║  ██████╔╝╚█████╔╝
+         ╚═╝   ╚═╝  ╚═════╝  ╚════╝
+A MQTT bridge for Paradox Spectra alarm panel
+""")
+
 # Notes on the Paradox P1738 Serial Output packets
 # This info comes from looking at the different packets received on the serial
 # port while performing different actions such as opening and closing each of
@@ -60,7 +70,7 @@ def log_msg_bytes(packet):
     raw = struct.unpack("BBBB", packet)
     text = hex(raw[0]) + " " + hex(raw[1]) + " " + hex(raw[2]) + " " + hex(raw[3])
     MQTT_CLIENT.publish("p1738/debug", payload=text, qos=1)
-    logging.debug(text)
+    logging.info("In: " + text)
 
 def run_loop():
     """
@@ -80,10 +90,11 @@ def run_loop():
                     topic = get_topic_for_zone(zone)
                     state = get_state_for_event(event)
                     MQTT_CLIENT.publish(topic, payload=state, qos=1)
-                    logging.info(state + " is being published to " + topic)
+                    logging.info("Out: " + topic + ", " + state)
             else:
-                logging.warning(repr(len(rcv)) + " bytes discarded: " + repr(rcv))
+                logging.warning("The following bytes have been discarded: " + repr(rcv))
 
+logging.getLogger().setLevel(logging.INFO)
 LOGGING_FILE_HANDLER = logging.FileHandler('p1738.log', 'w')
 LOGGING_FILE_HANDLER.setLevel(logging.WARNING)
 LOGGING_STREAM_HANDLER = logging.StreamHandler(sys.stdout)
@@ -92,9 +103,12 @@ logging.getLogger().addHandler(LOGGING_FILE_HANDLER)
 logging.getLogger().addHandler(LOGGING_STREAM_HANDLER)
 
 # Read configuration
+logging.info("Reading configuration file")
 CONFIG = yaml.safe_load(open("1738.yaml"))
 
 MQTT_BROKER = CONFIG['mqtt_broker']
+SERIAL_DEVICE = CONFIG['serial_device']
+
 logging.info("Connecting to MQTT Broker: " + MQTT_BROKER)
 
 MQTT_CLIENT = mqtt.Client()
@@ -104,9 +118,11 @@ MQTT_CLIENT.loop_start()
 
 MQTT_CLIENT.publish("p1738/service", payload="online", qos=1, retain=True)
 
-SERIAL = serial.Serial("/dev/ttyAMA0", baudrate=9600, timeout=5)
-
-print("Paradox Spectra 1738 to MQTT started")
 logging.info("Connected")
+
+logging.info("Opening serial device: " + SERIAL_DEVICE)
+SERIAL = serial.Serial(SERIAL_DEVICE, baudrate=9600, timeout=5)
+
+logging.info("Listening for packets")
 
 run_loop()
