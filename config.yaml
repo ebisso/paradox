@@ -1,4 +1,4 @@
-### 1738.yaml
+### config.yaml
 
 # mqtt connection
 mqtt_broker: 127.0.0.1
@@ -9,8 +9,8 @@ serial_device: /dev/ttyAMA0
 # status
 status:
   topic: paradox/status
-  message_connect: ONLINE
-  message_disconnect: OFFLINE
+  message_connect: online
+  message_disconnect: offline
 
 message_mapping:
   # alarm panel
@@ -33,49 +33,49 @@ message_mapping:
     # contacts
   - bytes: [0x04, 0x11]
     topic: paradox/contacts/1
-    message: 'ON'
+    message: on
   - bytes: [0x00, 0x11]
     topic: paradox/contacts/1
-    message: 'OFF'
+    message: off
   - bytes: [0x04, 0x21]
     topic: paradox/contacts/2
-    message: 'ON'
+    message: on
   - bytes: [0x00, 0x21]
     topic: paradox/contacts/2
-    message: 'OFF'
+    message: off
   - bytes: [0x04, 0x31]
     topic: paradox/contacts/3
-    message: 'ON'
+    message: on
   - bytes: [0x00, 0x31]
     topic: paradox/contacts/3
-    message: 'OFF'
+    message: off
   - bytes: [0x04, 0x41]
     topic: paradox/contacts/4
-    message: 'ON'
+    message: on
   - bytes: [0x00, 0x41]
     topic: paradox/contacts/4
-    message: 'OFF'
+    message: off
   - bytes: [0x04, 0x51]
     topic: paradox/contacts/5
-    message: 'ON'
+    message: on
   - bytes: [0x00, 0x51]
     topic: paradox/contacts/5
-    message: 'OFF'
+    message: off
   - bytes: [0x04, 0x61]
     topic: paradox/contacts/6
-    message: 'ON'
+    message: on
   - bytes: [0x00, 0x61]
     topic: paradox/contacts/6
-    message: 'OFF'
+    message: off
   - bytes: [0x04, 0x71]
     topic: paradox/contacts/7
-    message: 'ON'
+    message: on
   - bytes: [0x00, 0x71]
     topic: paradox/contacts/7
-    message: 'OFF'
+    message: off
   - bytes: [0x04, 0x81]
     topic: paradox/contacts/8
-    message: 'ON'
+    message: on
   - bytes: [0x00, 0x81]
     topic: paradox/contacts/8
-    message: 'OFF'
+    message: off

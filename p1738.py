@@ -1,5 +1,5 @@
 """
-P1738.py
+p1738.py
 This script listens for debug serial port packets from a Paradox Spectra 1738
 alarm panel and sends decoded messages to a MQTT broker.
 """
@@ -89,7 +89,7 @@ logging.getLogger().addHandler(LOGGING_STREAM_HANDLER)
 
 # Read configuration
 logging.info("Reading configuration file")
-CONFIG = yaml.safe_load(open("1738.yaml"))
+CONFIG = yaml.safe_load(open("config.yaml"))
 
 MQTT_BROKER = CONFIG['mqtt_broker']
 SERIAL_DEVICE = CONFIG['serial_device']
