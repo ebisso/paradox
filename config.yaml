@@ -33,49 +33,49 @@ message_mapping:
     # contacts
   - bytes: [0x04, 0x11]
     topic: paradox/contacts/1
-    message: on
+    message: ON
   - bytes: [0x00, 0x11]
     topic: paradox/contacts/1
-    message: off
+    message: OFF
   - bytes: [0x04, 0x21]
     topic: paradox/contacts/2
-    message: on
+    message: ON
   - bytes: [0x00, 0x21]
     topic: paradox/contacts/2
-    message: off
+    message: OFF
   - bytes: [0x04, 0x31]
     topic: paradox/contacts/3
-    message: on
+    message: ON
   - bytes: [0x00, 0x31]
     topic: paradox/contacts/3
-    message: off
+    message: OFF
   - bytes: [0x04, 0x41]
     topic: paradox/contacts/4
-    message: on
+    message: ON
   - bytes: [0x00, 0x41]
     topic: paradox/contacts/4
-    message: off
+    message: OFF
   - bytes: [0x04, 0x51]
     topic: paradox/contacts/5
-    message: on
+    message: ON
   - bytes: [0x00, 0x51]
     topic: paradox/contacts/5
-    message: off
+    message: OFF
   - bytes: [0x04, 0x61]
     topic: paradox/contacts/6
-    message: on
+    message: ON
   - bytes: [0x00, 0x61]
     topic: paradox/contacts/6
-    message: off
+    message: OFF
   - bytes: [0x04, 0x71]
     topic: paradox/contacts/7
-    message: on
+    message: ON
   - bytes: [0x00, 0x71]
     topic: paradox/contacts/7
-    message: off
+    message: OFF
   - bytes: [0x04, 0x81]
     topic: paradox/contacts/8
-    message: on
+    message: ON
   - bytes: [0x00, 0x81]
     topic: paradox/contacts/8
-    message: off
+    message: OFF
