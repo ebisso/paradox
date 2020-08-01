@@ -17,19 +17,37 @@ message_mapping:
   - bytes: [0x3c, 0x11]
     topic: paradox/alarm_panel
     message: disarmed
-  - bytes: [0x00, 0x00]
+  - bytes: [0x40, 0x11]
     topic: paradox/alarm_panel
-    message: armed_home
+    message: disarmed
   - bytes: [0x34, 0x11]
     topic: paradox/alarm_panel
     message: armed_away
-  - bytes: [0x00, 0x00]
-    topic: paradox/alarm_panel
-    message: pending
-  - bytes: [0x00, 0x00]
+  - bytes: [0x50, 0x11]
     topic: paradox/alarm_panel
     message: triggered
-    
+  - bytes: [0x50, 0x21]
+    topic: paradox/alarm_panel
+    message: triggered
+  - bytes: [0x50, 0x31]
+    topic: paradox/alarm_panel
+    message: triggered
+  - bytes: [0x50, 0x41]
+    topic: paradox/alarm_panel
+    message: triggered
+  - bytes: [0x50, 0x51]
+    topic: paradox/alarm_panel
+    message: triggered
+  - bytes: [0x50, 0x61]
+    topic: paradox/alarm_panel
+    message: triggered
+  - bytes: [0x50, 0x71]
+    topic: paradox/alarm_panel
+    message: triggered
+  - bytes: [0x50, 0x81]
+    topic: paradox/alarm_panel
+    message: triggered
+
     # contacts
   - bytes: [0x04, 0x11]
     topic: paradox/contacts/1
