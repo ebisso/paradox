@@ -1,10 +1,11 @@
-FROM arm32v6/python:3-alpine
+FROM python:alpine
 
 WORKDIR /usr/src/app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
-COPY . .
+COPY paradox2mqtt.py .
+COPY config.yaml .
 
-CMD [ "python", "p1738.py"]
+CMD [ "python", "paradox2mqtt.py"]
