@@ -93,6 +93,7 @@ CONFIG = yaml.safe_load(open("config.yaml"))
 
 MQTT_BROKER = CONFIG['mqtt_broker']
 SERIAL_DEVICE = CONFIG['serial_device']
+SERIAL_BAUDRATE = CONFIG['serial_speed']
 STATUS_TOPIC = CONFIG['status']['topic']
 STATUS_MESSAGE_CONNECT = CONFIG['status']['message_connect']
 STATUS_MESSAGE_DISCONNECT = CONFIG['status']['message_disconnect']
@@ -112,7 +113,7 @@ MQTT_CLIENT.publish(STATUS_TOPIC, payload=STATUS_MESSAGE_CONNECT, qos=1,
 logging.info("Connected")
 
 logging.info("Opening serial device: " + SERIAL_DEVICE)
-SERIAL = serial.Serial(SERIAL_DEVICE, baudrate=9600, timeout=5)
+SERIAL = serial.Serial(SERIAL_DEVICE, baudrate=SERIAL_BAUDRATE, timeout=5)
 
 logging.info("Listening for packets")
 
