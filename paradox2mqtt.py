@@ -13,6 +13,17 @@ import paho.mqtt.client as mqtt
 import yaml
 
 
+print("""
+         ██╗███████╗██████╗  █████╗ 
+        ███║╚════██║╚════██╗██╔══██╗
+        ╚██║    ██╔╝ █████╔╝╚█████╔╝
+         ██║   ██╔╝  ╚═══██╗██╔══██╗
+         ██║   ██║  ██████╔╝╚█████╔╝
+         ╚═╝   ╚═╝  ╚═════╝  ╚════╝
+A MQTT bridge for Paradox Spectra alarm panel
+""")
+
+
 # Notes on the Paradox P1738 Serial Output packets
 # This info comes from looking at the different packets received on the serial
 # port while performing different actions such as opening and closing each of
@@ -38,7 +49,7 @@ def parse_msg(packet):
 
 def find_mapping(code):
     """ Looks-up an event code for a matching message mapping """
-    for mapping in _message_mapping:
+    for mapping in message_mapping:
         if mapping['bytes'] == code:
             return mapping
     return None
@@ -49,7 +60,7 @@ def log_msg_bytes(packet):
     raw = struct.unpack("BBBB", packet)
     text = (hex(raw[0]) + " " + hex(raw[1]) + " " + hex(raw[2]) + " "
             + hex(raw[3]))
-    _mqtt_client.publish("paradox2mqtt/debug", payload=text, qos=1)
+    mqtt_client.publish("paradox2mqtt/debug", payload=text, qos=1)
     logging.info("In: %s", text)
 
 
@@ -72,24 +83,14 @@ def run_loop():
                     topic = mapping['topic']
                     message = mapping['message']
                     logging.info("Out: %s, %s", repr(topic), repr(message))
-                    _mqtt_client.publish(topic, payload=message, qos=1)
+                    mqtt_client.publish(topic, payload=message, qos=1)
             else:
                 logging.warning(
                     "The following bytes have been discarded: %s",
                     repr(rcv))
 
 
-_PROGRAM_START_MESSAGE = """
-
-  paradox2mqtt
-
-  An MQTT bridge for the Paradox Spectra 1738 alarm panel
-
-"""
-
-
-print(_PROGRAM_START_MESSAGE)
-
+# Initialize logger to file and standard output
 logging.getLogger().setLevel(logging.INFO)
 logging_file_handler = logging.FileHandler('paradox2mqtt.log', 'w')
 logging_file_handler.setLevel(logging.WARNING)
@@ -98,7 +99,7 @@ logging_stream_handler.setLevel(logging.INFO)
 logging.getLogger().addHandler(logging_file_handler)
 logging.getLogger().addHandler(logging_stream_handler)
 
-# Read configuration
+
 logging.info("Reading configuration file")
 with open("config.yaml", encoding='utf8') as f:
     config = yaml.safe_load(f)
@@ -108,24 +109,23 @@ serial_device = config['serial_device']
 status_topic = config['status']['topic']
 status_message_connect = config['status']['message_connect']
 status_message_disconnect = config['status']['message_disconnect']
-_message_mapping = config['message_mapping']
+message_mapping = config['message_mapping']
 
 logging.info("Connecting to MQTT Broker: %s", mqtt_broker)
 
-_mqtt_client = mqtt.Client()
-_mqtt_client.will_set(status_topic, payload=status_message_disconnect, qos=1,
-                      retain=True)
-_mqtt_client.connect(mqtt_broker)
-_mqtt_client.loop_start()
-
-_mqtt_client.publish(status_topic, payload=status_message_connect, qos=1,
-                     retain=True)
+mqtt_client = mqtt.Client()
+mqtt_client.will_set(status_topic, payload=status_message_disconnect, qos=1,
+                    retain=True)
+mqtt_client.connect(mqtt_broker)
+mqtt_client.loop_start()
 
 logging.info("Connected")
+mqtt_client.publish(status_topic, payload=status_message_connect, qos=1,
+                    retain=True)
 
 logging.info("Opening serial device: %s", serial_device)
 _serial = serial.Serial(serial_device, baudrate=9600, timeout=5)
 
-logging.info("Listening for packets")
 
+logging.info("Started listening for packets")
 run_loop()
